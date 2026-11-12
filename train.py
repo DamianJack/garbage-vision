@@ -1,4 +1,4 @@
-"""Apply training augmentation to the dataset."""
+"""Fine-tune a YOLO detector with training-time augmentation."""
 
 from pathlib import Path
 from ultralytics import YOLO
@@ -25,7 +25,6 @@ def main():
     model.train(
         data=str(DATA_YAML),
         imgsz=416,
-        augment=True,
         epochs=100,
         batch=16,
         patience=20,
