@@ -1,4 +1,4 @@
-"""Apply training augmentation to the dataset."""
+"""Train a YOLO detector from scratch with training-time augmentation."""
 
 from pathlib import Path
 from ultralytics import YOLO
@@ -20,19 +20,20 @@ AUGMENTATION = {
 
 
 def main():
-
-    model = YOLO("yolov8n.pt")
+    # Build the YOLOv8n architecture without loading pretrained weights.
+    model = YOLO("yolov8n.yaml")
     model.train(
         data=str(DATA_YAML),
         imgsz=416,
-        augment=True,
         epochs=100,
         batch=16,
         patience=20,
         seed=42,
+        pretrained=False,
         **AUGMENTATION,
         project=str(Path(__file__).resolve().parent / "runs" / "detect"),
-        name="garbage-yolov8n",
+        name="garbage-yolov8n-scratch",
+        exist_ok=True,
     )
 
 
