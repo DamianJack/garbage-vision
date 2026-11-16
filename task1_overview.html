@@ -14,7 +14,7 @@
   html,body{margin:0}
   body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.6;min-height:100vh}
   canvas#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-  .wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:56px 22px 70px}
+  .wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:56px 22px 70px}
   .kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);font-weight:600}
   h1{font-size:28px;font-weight:600;margin:8px 0 6px;letter-spacing:-.01em}
   .sub{color:var(--muted);margin:0 0 30px}
@@ -51,9 +51,9 @@
   .pipe{background:var(--card);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
         border:1px solid var(--line);border-radius:16px;padding:20px 18px 16px;margin:0 0 26px}
   .pipe-label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 14px 4px}
-  .flow{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:4px}
-  .step{all:unset;box-sizing:border-box;cursor:pointer;flex:1 1 0;min-width:92px;text-align:center;
-        padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:#fbfaf7;
+  .flow{display:flex;align-items:stretch;gap:0;padding-bottom:4px}
+  .step{all:unset;box-sizing:border-box;cursor:pointer;flex:1 1 0;min-width:0;text-align:center;
+        padding:10px 4px;border-radius:12px;border:1px solid var(--line);background:#fbfaf7;
         transition:background .25s,border-color .25s,transform .25s}
   .step:hover{background:var(--sage-soft);border-color:#c9d6ce;transform:translateY(-2px)}
   .step:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
@@ -62,7 +62,9 @@
   .step .s{display:block;font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.3}
   .step.out{background:var(--sage);border-color:var(--sage);color:#fff}
   .step.out .n,.step.out .s{color:rgba(255,255,255,.85)}
-  .arrow{flex:none;width:22px;display:grid;place-items:center;color:#b8bfba;font-size:15px}
+  .arrow{flex:none;width:16px;display:grid;place-items:center;color:#b8bfba;font-size:13px}
+  .step .t{font-size:13px}
+  .step .s{font-size:11px}
   .real{margin:16px 0 0;text-align:center}
   .real img{width:100%;max-width:420px;border-radius:10px;border:1px solid var(--line);display:block;margin:0 auto}
   .real figcaption{font-size:13px;color:var(--muted);margin-top:8px}
@@ -313,7 +315,7 @@ document.querySelectorAll('.step').forEach(s=>{
   function scanline(){
     scan=(scan+0.35)%(H+120);
     const g=x.createLinearGradient(0,scan-60,0,scan);
-    g.addColorStop(0,'rgba(127,156,140,0)');g.addColorStop(1,'rgba(127,156,140,.10)');
+    g.addColorStop(0,'rgba(127,156,140,0)');g.addColorStop(1,'rgba(127,156,140,.06)');
     x.fillStyle=g;x.fillRect(0,scan-60,W,60);
     x.fillStyle='rgba(127,156,140,.28)';x.fillRect(0,scan,W,1);
   }
