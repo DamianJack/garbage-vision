@@ -1,0 +1,8 @@
+path: /Users/shravanijoshi/Desktop/CV-1/garbage-vision/GarbageSplit       
+train: images/train
+val: images/val
+test: images/test
+
+nc: 6               
+
+names: ['biodegradable', 'cardboard', 'glass', 'metal', 'paper', 'plastic']
