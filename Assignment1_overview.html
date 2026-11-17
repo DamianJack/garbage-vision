@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Task 1 – Dataset Analysis & Training Pipeline</title>
+<title>Assignment 1 – Garbage Detection with YOLOv5s</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -79,6 +79,27 @@
   #msvg .lbl{font-size:12px;fill:#7a807c;font-family:Inter,sans-serif;transition:opacity .5s}
   #mframe{transition:opacity .6s .6s}
   .mcap{font-size:13px;color:var(--muted);margin:6px 2px 0;text-align:center;min-height:20px}
+  .task{display:flex;align-items:baseline;gap:12px;margin:44px 0 14px}
+  .task .tag{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--sage);
+        padding:3px 10px;border-radius:999px;font-weight:600}
+  .task h2{font-size:19px;font-weight:600;margin:0}
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:4px 0 14px}
+  .mcard{border:1px solid var(--line);border-radius:12px;background:#fbfaf7;padding:12px}
+  .mcard .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+  .mcard .k{font-size:12.5px;font-weight:500;margin-top:2px}
+  .mcard .d{font-size:12px;color:var(--muted);line-height:1.35;margin-top:4px}
+  .cmp{display:grid;grid-template-columns:90px 1fr 50px;gap:10px;align-items:center;font-size:14px;margin:6px 0}
+  .track{height:10px;background:#efece5;border-radius:5px;overflow:hidden}
+  .fill{height:100%;border-radius:5px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+  .col{border:1px solid var(--line);border-radius:12px;background:#fbfaf7;padding:12px 14px}
+  .col h4{margin:0 0 6px;font-size:13.5px;font-weight:600}
+  .col.good h4{color:#5f7f6e}
+  .col.bad h4{color:#a0705a}
+  .col li{font-size:14px}
+  .col.bad li::before{border-color:#c9a08b}
+  td.mono{font-variant-numeric:tabular-nums}
+  @media (max-width:640px){.cards{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
   .pulse{animation:pulse 1.6s ease}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(127,156,140,.45)}100%{box-shadow:0 0 0 14px rgba(127,156,140,0)}}
   @media (max-width:640px){
@@ -93,9 +114,11 @@
 <canvas id="bg" aria-hidden="true"></canvas>
 
 <div class="wrap">
-  <div class="kicker">Assignment 1 · Task 1</div>
-  <h1>Dataset Analysis &amp; Training Pipeline</h1>
-  <p class="sub">Garbage Detection Dataset · YOLOv5s. Click a step or a section to open it.</p>
+  <div class="kicker">Computer Vision Portfolio 1 · Assignment 1</div>
+  <h1>Garbage Detection with YOLOv5s</h1>
+  <p class="sub">Task 1: dataset analysis &amp; pipeline · Task 2: training &amp; evaluation. Click a step or a section to open it.</p>
+
+  <div class="task" style="margin-top:6px"><span class="tag">Task 1</span><h2>Dataset analysis &amp; training pipeline</h2></div>
 
   <div class="pipe">
     <div class="pipe-label">Our pipeline, step by step</div>
@@ -254,7 +277,111 @@
     </ul></div></div></div>
   </div>
 
-  <div class="foot">Task 2 (evaluation) and Task 3 (error analysis) will follow.</div>
+  <div class="task"><span class="tag">Task 2</span><h2>Training &amp; evaluation</h2></div>
+
+  <div class="pipe">
+    <div class="pipe-label">From training to results</div>
+    <div class="flow">
+      <button class="step" data-go="8"><span class="n">1</span><span class="t">Train</span><span class="s">guess · check · adjust</span></button>
+      <span class="arrow">→</span>
+      <button class="step" data-go="8"><span class="n">2</span><span class="t">best.pt</span><span class="s">best epoch</span></button>
+      <span class="arrow">→</span>
+      <button class="step" data-go="9"><span class="n">3</span><span class="t">Test</span><span class="s">1,574 unseen images</span></button>
+      <span class="arrow">→</span>
+      <button class="step" data-go="10"><span class="n">4</span><span class="t">Metrics</span><span class="s">P · R · mAP</span></button>
+      <span class="arrow">→</span>
+      <button class="step" data-go="11"><span class="n">5</span><span class="t">Per class</span><span class="s">glass best · paper worst</span></button>
+      <span class="arrow">→</span>
+      <button class="step out" data-go="12"><span class="n">result</span><span class="t">mAP50 0.636</span><span class="s">strengths &amp; limits</span></button>
+    </div>
+  </div>
+
+  <div class="item">
+    <button class="head" aria-expanded="false"><span class="num">8</span><span class="title">How training works</span><span class="hint">guess → check → adjust</span><span class="chev"></span></button>
+    <div class="body"><div><div class="inner"><ul>
+      <li>Guess: the model predicts boxes and classes for a batch of photos</li>
+      <li>Check: compare with the label files (the correct answers)</li>
+      <li>Measure the mistake: <code>box_loss</code>, <code>obj_loss</code>, <code>cls_loss</code></li>
+      <li>Adjust: change the filter values a tiny bit, then repeat</li>
+      <li>1 epoch = all 7,322 training photos seen once</li>
+      <li>Learns edges and colours first, then shapes and textures</li>
+      <li><code>best.pt</code> = the learned weights (~7 M numbers) of the best epoch</li>
+      <li>Scores of every epoch are logged in <code>results.csv</code></li>
+    </ul></div></div></div>
+  </div>
+
+  <div class="item">
+    <button class="head" aria-expanded="false"><span class="num">9</span><span class="title">Testing on unseen data</span><span class="hint">1,574 test images</span><span class="chev"></span></button>
+    <div class="body"><div><div class="inner">
+      <div class="cmp"><span>Validation</span><div class="track"><div class="fill" style="width:64.9%;background:#9fb7c6"></div></div><span>0.649</span></div>
+      <div class="cmp"><span>Test</span><div class="track"><div class="fill" style="width:63.6%;background:#7f9c8c"></div></div><span>0.636</span></div>
+      <ul style="margin-top:10px">
+        <li>Test set = the real exam: new photos, used only once</li>
+        <li>Validation was used to pick <code>best.pt</code>, so it is slightly optimistic</li>
+        <li>Test ≈ validation → the model generalises, no overfitting</li>
+      </ul>
+    </div></div></div>
+  </div>
+
+  <div class="item">
+    <button class="head" aria-expanded="false"><span class="num">10</span><span class="title">Metrics explained</span><span class="hint">P · R · mAP</span><span class="chev"></span></button>
+    <div class="body"><div><div class="inner">
+      <div class="cards">
+        <div class="mcard"><div class="v">0.735</div><div class="k">Precision</div><div class="d">of the boxes drawn, how many are right</div></div>
+        <div class="mcard"><div class="v">0.565</div><div class="k">Recall</div><div class="d">of the real objects, how many were found</div></div>
+        <div class="mcard"><div class="v">0.636</div><div class="k">mAP50</div><div class="d">average AP over 6 classes, overlap ≥ 50 %</div></div>
+        <div class="mcard"><div class="v">0.411</div><div class="k">mAP50-95</div><div class="d">stricter: boxes must fit tightly</div></div>
+      </div>
+      <ul>
+        <li>IoU = overlap ÷ total area of predicted and true box</li>
+        <li>A detection counts as correct if IoU ≥ 0.5 and the class matches</li>
+        <li>AP = precision and recall combined, per class; mAP = mean over classes</li>
+        <li>Bigger problem: missed objects (recall 0.565), not wrong boxes</li>
+      </ul>
+    </div></div></div>
+  </div>
+
+  <div class="item">
+    <button class="head" aria-expanded="false"><span class="num">11</span><span class="title">Results per class</span><span class="hint">glass best · paper worst</span><span class="chev"></span></button>
+    <div class="body"><div><div class="inner">
+      <table>
+        <tr><th>Class</th><th>P</th><th>R</th><th>mAP50</th><th>mAP50-95</th><th style="width:28%"></th></tr>
+        <tr><td>glass</td><td class="mono">0.826</td><td class="mono">0.669</td><td class="mono"><b>0.737</b></td><td class="mono">0.520</td><td><div class="bar" style="width:73.7%"></div></td></tr>
+        <tr><td>biodegradable</td><td class="mono">0.746</td><td class="mono">0.579</td><td class="mono">0.644</td><td class="mono">0.330</td><td><div class="bar" style="width:64.4%"></div></td></tr>
+        <tr><td>metal</td><td class="mono">0.774</td><td class="mono">0.571</td><td class="mono">0.627</td><td class="mono">0.417</td><td><div class="bar" style="width:62.7%"></div></td></tr>
+        <tr><td>plastic</td><td class="mono">0.627</td><td class="mono">0.587</td><td class="mono">0.619</td><td class="mono">0.373</td><td><div class="bar" style="width:61.9%"></div></td></tr>
+        <tr><td>cardboard</td><td class="mono">0.699</td><td class="mono">0.490</td><td class="mono">0.594</td><td class="mono">0.413</td><td><div class="bar" style="width:59.4%"></div></td></tr>
+        <tr><td>paper</td><td class="mono">0.736</td><td class="mono">0.492</td><td class="mono">0.592</td><td class="mono">0.413</td><td><div class="bar" style="width:59.2%"></div></td></tr>
+      </table>
+      <ul>
+        <li>Glass best: consistent shapes, clear edges, transparent and reflective</li>
+        <li>Paper and cardboard worst: fewest examples, and they look alike</li>
+        <li>Biodegradable: lowest mAP50-95 (0.330), irregular shapes give loose boxes</li>
+        <li>Plastic: lowest precision (0.627), confused with glass and metal</li>
+        <li>More data isn't everything: consistent appearance matters too</li>
+      </ul>
+    </div></div></div>
+  </div>
+
+  <div class="item">
+    <button class="head" aria-expanded="false"><span class="num">12</span><span class="title">Strengths &amp; limitations</span><span class="hint">what works, what doesn't</span><span class="chev"></span></button>
+    <div class="body"><div><div class="inner">
+      <div class="two">
+        <div class="col good"><h4>Strengths</h4><ul>
+          <li>High precision (0.735): detections are usually correct</li>
+          <li>Generalises well: test ≈ validation</li>
+          <li>Reliable on clear, separate objects</li>
+        </ul></div>
+        <div class="col bad"><h4>Limitations</h4><ul>
+          <li>Low recall (0.565): misses objects in crowded scenes</li>
+          <li>Confuses look-alikes: paper ↔ cardboard, plastic ↔ glass/metal</li>
+          <li>Loose boxes on irregular shapes</li>
+        </ul></div>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="foot">Task 3 (visualisation &amp; error analysis) will follow.</div>
 </div>
 
 <script>

@@ -1,6 +1,12 @@
-# Task 1 – Dataset Analysis & Training Pipeline
+# Assignment 1 – Garbage Detection with YOLOv5s
 
-Garbage Detection Dataset · YOLOv5s · Computer Vision Portfolio 1, Assignment 1
+Computer Vision Portfolio 1 · Task 1: dataset analysis & pipeline · Task 2: training & evaluation
+
+Click a section to open it.
+
+---
+
+# Task 1 – Dataset Analysis & Training Pipeline
 
 ## Our pipeline
 
@@ -9,10 +15,6 @@ Garbage Detection Dataset · YOLOv5s · Computer Vision Portfolio 1, Assignment 
 10,464   imbalanced   stratified  640·flip   YOLOv5s   70 epochs  best val
 images   & crowded    70/15/15    ·mosaic    pretrained patience 15 mAP
 ```
-
-Click a section to open it.
-
----
 
 <details>
 <summary><b>1. The data</b></summary>
@@ -129,14 +131,114 @@ python train.py --img 640 --batch 16 --epochs 70 --patience 15 \
 
 </details>
 
+---
+
+# Task 2 – Training & Evaluation
+
+## From training to results
+
+```
+ Train  →  best.pt  →  Test  →  Metrics  →  Per class  →  mAP50 0.636
+ guess ·    best      1,574     P · R ·     glass best ·   strengths &
+ check ·    epoch     unseen    mAP         paper worst    limitations
+ adjust
+```
+
 <details>
-<summary><b>8. Files</b></summary>
+<summary><b>8. How training works</b></summary>
+
+- **Guess:** the model predicts boxes and classes for a batch of photos
+- **Check:** compare with the label files (the correct answers)
+- **Measure the mistake:** `box_loss` (box position), `obj_loss` (object or not), `cls_loss` (class)
+- **Adjust:** change the filter values a tiny bit, then repeat
+- **1 epoch** = all 7,322 training photos seen once
+- Learns edges and colours first, then shapes and textures
+- **`best.pt`** = the learned weights (~7 M numbers) of the epoch with the best validation mAP
+- Scores of every epoch are logged in `results.csv`
+
+</details>
+
+<details>
+<summary><b>9. Testing on unseen data</b></summary>
+
+| Split | mAP50 |
+|---|---|
+| Validation | 0.649 |
+| **Test (1,574 images)** | **0.636** |
+
+- Test set = the real exam: new photos, used only once
+- Validation was used to pick `best.pt`, so it is slightly optimistic
+- Test ≈ validation → the model generalises, **no overfitting**
+
+```bash
+python val.py --weights best.pt --data GarbageSplit/data.yaml --task test --img 640 --verbose
+```
+
+</details>
+
+<details>
+<summary><b>10. Metrics explained</b></summary>
+
+| Metric | Test | Meaning |
+|---|---|---|
+| Precision | **0.735** | of the boxes drawn, how many are right |
+| Recall | **0.565** | of the real objects, how many were found |
+| mAP50 | **0.636** | average AP over the 6 classes, overlap ≥ 50 % |
+| mAP50-95 | **0.411** | stricter: averaged over overlaps 50–95 %, boxes must fit tightly |
+
+- **IoU** = overlap ÷ total area of the predicted and the true box
+- A detection counts as correct if IoU ≥ 0.5 and the class matches
+- **AP** = precision and recall combined, per class; **mAP** = mean over the classes
+- Bigger problem: **missed objects** (recall 0.565), not wrong boxes
+
+</details>
+
+<details>
+<summary><b>11. Results per class</b></summary>
+
+| Class | P | R | mAP50 | mAP50-95 |
+|---|---|---|---|---|
+| glass | 0.826 | 0.669 | **0.737** | 0.520 |
+| biodegradable | 0.746 | 0.579 | 0.644 | 0.330 |
+| metal | 0.774 | 0.571 | 0.627 | 0.417 |
+| plastic | 0.627 | 0.587 | 0.619 | 0.373 |
+| cardboard | 0.699 | 0.490 | 0.594 | 0.413 |
+| paper | 0.736 | 0.492 | **0.592** | 0.413 |
+
+- **Glass best:** consistent shapes, clear edges, transparent and reflective
+- **Paper and cardboard worst:** fewest training examples, and they look alike
+- **Biodegradable:** lowest mAP50-95 (0.330), irregular shapes give loose boxes
+- **Plastic:** lowest precision (0.627), confused with glass and metal
+- More data isn't everything: a consistent appearance matters too
+
+</details>
+
+<details>
+<summary><b>12. Strengths & limitations</b></summary>
+
+**Strengths**
+- High precision (0.735): detections are usually correct
+- Generalises well: test (0.636) ≈ validation (0.649)
+- Reliable on clear, separate objects (glass 0.737)
+
+**Limitations**
+- Low recall (0.565): misses small, overlapping objects in crowded scenes
+- Confuses look-alike classes: paper ↔ cardboard, plastic ↔ glass/metal
+- Loose boxes on irregular shapes (biodegradable mAP50-95 = 0.330)
+
+</details>
+
+---
+
+<details>
+<summary><b>Files</b></summary>
 
 - `label.py` – class counts (data analysis)
 - `split.py` – stratified 70/15/15 split
 - `check_split.py` – per-class distribution of each split
 - `GarbageSplit/data.yaml` – dataset config for YOLOv5
 - `make_mosaic.py` – builds `mosaic_example.png` from 4 real training images
+- `best.pt` – trained model (best epoch)
 - `task1_overview.html` – visual overview of this documentation
 
 </details>
