@@ -40,23 +40,23 @@ Prof. Dr. Dominik Seuß · WS 2026 · **Team:** Damian, Krishna, Shravani
 
 **Correct**
 
-![](img/c1.jpg) ![](img/c2.jpg) ![](img/c3.jpg)
+![](c1.jpg) ![](c2.jpg) ![](c3.jpg)
 
 **Missed**
 
-![](img/m1.jpg) ![](img/m2.jpg) ![](img/m3.jpg)
+![](m1.jpg) ![](m2.jpg) ![](m3.jpg)
 
 **Wrong class**
 
-![](img/w1.jpg) ![](img/w2.jpg) ![](img/w3.jpg)
+![](w1.jpg) ![](w2.jpg) ![](w3.jpg)
 
 **False alarm**
 
-![](img/f1.jpg) ![](img/f2.jpg)
+![](f1.jpg) ![](f2.jpg)
 
 **Counts over the test images (≤ 5 objects)**
 
-![](img/numbers.png)
+![](numbers.png)
 
 **Causes**
 - Look-alike materials: paper ↔ cardboard, glass ↔ metal (reflections)
