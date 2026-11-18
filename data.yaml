@@ -1,0 +1,8 @@
+path: ../GarbageSplit
+train: images/train
+val: images/val
+test: images/test
+
+nc: 6               
+
+names: ['biodegradable', 'cardboard', 'glass', 'metal', 'paper', 'plastic']

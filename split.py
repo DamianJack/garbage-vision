@@ -1,6 +1,9 @@
-# split.py - Stratified 70/15/15 split of the Garbage Detection Dataset
+"""split.py - Stratified 70/15/15 split of the Garbage Detection Dataset.
 
-# ---------- Step 1: imports ----------
+Each image is assigned to the group of its rarest class (counted over the
+whole dataset); every group is shuffled (seed 42) and cut 70/15/15.
+Output: GarbageSplit/{images,labels}/{train,val,test} (YOLO layout).
+"""
 import random
 import shutil
 from collections import Counter, defaultdict
@@ -8,64 +11,75 @@ from pathlib import Path
 
 IMAGES = Path("GarbageDataset/images")
 LABELS = Path("GarbageDataset/labels")
-OUT    = Path("GarbageSplit")
+OUT = Path("GarbageSplit")
+SEED = 42
+TRAIN_RATIO, VAL_RATIO = 0.70, 0.15   # test gets the rest
 
-# ---------- Step 2: count boxes per class ----------
-counts = Counter()
-for file in LABELS.glob("*.txt"):
-    for line in file.read_text().splitlines():
-        if not line.strip():
-            continue
-        cls = int(line.split()[0])
-        counts[cls] += 1
-print("Boxes per class:", counts)
 
-# ---------- Step 3: group images by their rarest class ----------
-groups = defaultdict(list)
-for file in LABELS.glob("*.txt"):
-    image_classes = set()
-    for line in file.read_text().splitlines():
-        if not line.strip():
-            continue
-        image_classes.add(int(line.split()[0]))
+def read_classes(label_file):
+    """Return the class id of every box in one label file."""
+    return [int(line.split()[0])
+            for line in label_file.read_text().splitlines() if line.strip()]
 
-    if image_classes:
-        rarest = min(image_classes, key=lambda c: counts[c])
-    else:
-        rarest = -1                     
-    groups[rarest].append(file.stem)
 
-for g, items in sorted(groups.items()):
-    print("group", g, len(items))
+def count_boxes():
+    """Count boxes per class over the whole dataset."""
+    counts = Counter()
+    for file in LABELS.glob("*.txt"):
+        counts.update(read_classes(file))
+    return counts
 
-# ---------- Step 4: shuffle each group (seed = reproducible) ----------
-random.seed(42)
-for g, items in groups.items():
-    random.shuffle(items)
 
-# ---------- Step 5: split each group 70 / 15 / 15 ----------
-train, val, test = [], [], []
-for g, items in groups.items():
-    n = len(items)
-    n_train = int(n * 0.7)
-    n_val   = int(n * 0.15)
-    train += items[:n_train]
-    val   += items[n_train:n_train + n_val]
-    test  += items[n_train + n_val:]       
-print("train/val/test:", len(train), len(val), len(test))
+def group_by_rarest(counts):
+    """Put each image into the group of its rarest class (-1 = no boxes)."""
+    groups = defaultdict(list)
+    # Note: glob order can differ between systems; sorted() would make the
+    # split fully reproducible but was not used for the submitted model.
+    for file in LABELS.glob("*.txt"):
+        classes = set(read_classes(file))
+        rarest = min(classes, key=lambda c: counts[c]) if classes else -1
+        groups[rarest].append(file.stem)
+    return groups
 
-# ---------- Step 6: copy files into the YOLO folder layout ----------
-splits = {"train": train, "val": val, "test": test}
 
-for split_name, names in splits.items():
-    (OUT / "images" / split_name).mkdir(parents=True, exist_ok=True)
-    (OUT / "labels" / split_name).mkdir(parents=True, exist_ok=True)
+def split_groups(groups):
+    """Shuffle each group and cut it 70/15/15; test takes rounding leftovers."""
+    random.seed(SEED)
+    train, val, test = [], [], []
+    for items in groups.values():
+        random.shuffle(items)
+        n_train = int(len(items) * TRAIN_RATIO)
+        n_val = int(len(items) * VAL_RATIO)
+        train += items[:n_train]
+        val += items[n_train:n_train + n_val]
+        test += items[n_train + n_val:]
+    return {"train": train, "val": val, "test": test}
 
-    for name in names:
-        image_file = list(IMAGES.glob(name + ".*"))[0]  
-        label_file = LABELS / (name + ".txt")            
 
-        shutil.copy(image_file, OUT / "images" / split_name)
-        shutil.copy(label_file, OUT / "labels" / split_name)
+def copy_files(splits):
+    """Copy images and labels into the YOLO folder layout."""
+    for split_name, names in splits.items():
+        img_dir = OUT / "images" / split_name
+        lbl_dir = OUT / "labels" / split_name
+        img_dir.mkdir(parents=True, exist_ok=True)
+        lbl_dir.mkdir(parents=True, exist_ok=True)
+        for name in names:
+            image_file = next(IMAGES.glob(name + ".*"))
+            shutil.copy(image_file, img_dir)
+            shutil.copy(LABELS / (name + ".txt"), lbl_dir)
+        print(split_name, "copied:", len(names))
 
-    print(split_name, "copied:", len(names))
+
+def main():
+    counts = count_boxes()
+    print("Boxes per class:", counts)
+    groups = group_by_rarest(counts)
+    for g, items in sorted(groups.items()):
+        print("group", g, len(items))
+    splits = split_groups(groups)
+    print("train/val/test:", *(len(v) for v in splits.values()))
+    copy_files(splits)
+
+
+if __name__ == "__main__":
+    main()
